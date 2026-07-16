@@ -1,6 +1,7 @@
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
 import Statement from "./components/Statement.jsx";
+import Cases from "./components/Cases.jsx";
 
 export default function App() {
   return (
@@ -8,6 +9,7 @@ export default function App() {
       <Header />
       <Hero />
       <Statement />
+      <Cases />
     </div>
   );
 }
