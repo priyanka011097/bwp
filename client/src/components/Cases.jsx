@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import pintaboo from "../assets/pintaboo.mp4";
+import proeaseglobal from "../assets/proeaseglobal.mp4";
 
 function TagIcon({ name }) {
   switch (name) {
@@ -42,8 +44,9 @@ function TagIcon({ name }) {
 
 const CASES = [
   {
-    title: "Project One",
-    src: "/videos/case1.mp4",
+    title: "Pintaboo.com",
+    src: pintaboo,
+    href: "https://pintaboo.com/",
     tags: [
       { icon: "science", label: "Strategy" },
       { icon: "identity", label: "UI / UX" },
@@ -52,8 +55,9 @@ const CASES = [
     ],
   },
   {
-    title: "Project Two",
-    src: "/videos/case2.mp4",
+    title: "Proeaseglobal.com",
+    src: proeaseglobal,
+    href: "https://proeaseglobal.com/",
     tags: [
       { icon: "science", label: "Product" },
       { icon: "identity", label: "Design" },
@@ -93,12 +97,17 @@ export default function Cases() {
         {CASES.map((c) => (
           <a
             className="case-card"
-            href="#contact"
+            href={c.href}
             key={c.title}
-            onMouseEnter={() => setActive(true)}
-            onMouseLeave={() => setActive(false)}
+            {...(c.href?.startsWith("http")
+              ? { target: "_blank", rel: "noopener noreferrer" }
+              : {})}
           >
-            <div className="case-card__media">
+            <div
+              className="case-card__media"
+              onMouseEnter={() => setActive(true)}
+              onMouseLeave={() => setActive(false)}
+            >
               <video
                 src={c.src}
                 autoPlay
@@ -120,6 +129,36 @@ export default function Cases() {
             </ul>
           </a>
         ))}
+      </div>
+
+      <div className="cases__more">
+        <a className="cases-btn" href="#work">
+          <span className="cases-btn__circle cases-btn__circle--left">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M7 17L17 7M17 7H8M17 7V16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span className="cases-btn__pill">See all work</span>
+          <span className="cases-btn__circle cases-btn__circle--right">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M4 12h15M13 6l6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </a>
       </div>
 
       {/* Custom "SHOW CASE" cursor that follows the pointer over the cards */}

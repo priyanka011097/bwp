@@ -7,6 +7,15 @@ const CLOSE_MS = 600;
 export default function Header({ showLogo = true }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Logo only shows at the very top of the page
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const closeMenu = () => {
     setClosing(true);
@@ -30,7 +39,11 @@ export default function Header({ showLogo = true }) {
 
   return (
     <>
-      <header className={`header${showLogo ? "" : " header--no-logo"}`}>
+      <header
+        className={`header${showLogo ? "" : " header--no-logo"}${
+          scrolled ? " header--scrolled" : ""
+        }`}
+      >
         {showLogo && <Logo />}
         <button
           className="menu-btn"
