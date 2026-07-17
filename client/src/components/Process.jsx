@@ -29,9 +29,9 @@ export default function Process() {
       const total = rect.height - window.innerHeight;
       const p = clamp(-rect.top / total, 0, 1);
 
-      // Green circle fills over the first ~42% of the scroll
-      const cp = clamp(p / 0.42, 0, 1);
-      const tp = clamp((p - 0.42) / 0.58, 0, 1);
+      // Circle starts opening right away (no empty lead-in), fills over ~45%
+      const cp = clamp(p / 0.45, 0, 1);
+      const tp = clamp((p - 0.45) / 0.55, 0, 1);
       if (circleRef.current) {
         const diameter = 2 * Math.hypot(window.innerWidth / 2, window.innerHeight) * 1.04;
         circleRef.current.style.width = `${diameter}px`;
@@ -79,11 +79,6 @@ export default function Process() {
     <section className="process" id="approach" ref={sectionRef}>
       <div className="process__inner">
         <div className="process__circle" ref={circleRef} aria-hidden="true" />
-
-        <h2 className="process__heading" ref={headingRef}>
-          How I Work?
-        </h2>
-
         <div className="pstep-track" ref={trackRef}>
           {STEPS.map((step, i) => {
             const word = (

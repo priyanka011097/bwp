@@ -97,7 +97,7 @@ body::-webkit-scrollbar {
 /* ---------- Process / green circle-reveal + steps ---------- */
 .process {
   position: relative;
-  min-height: 150vh;
+  min-height: 230vh;
   background: var(--cream);
 }
 
@@ -571,7 +571,7 @@ body::-webkit-scrollbar {
 .cases__more {
   display: flex;
   justify-content: center;
-  margin-top: 5rem;
+  margin-top: 8rem;
 }
 
 .cases-btn {
