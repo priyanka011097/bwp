@@ -79,9 +79,9 @@ export default function Contact() {
 
           <label className="field">
             <span>What's your budget?</span>
-            <input
+            <textarea
               name="budget"
-              type="text"
+              rows="2"
               value={form.budget}
               onChange={handle}
               placeholder="I don't generate a quote — I ask your budget and fit everything in that."

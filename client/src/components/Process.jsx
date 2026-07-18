@@ -47,13 +47,16 @@ export default function Process() {
 
       // Each step: the word holds its place; only its image slides in/out beside it
       const n = STEPS.length;
-      const pos = tp * n; // 0..n
+      // map so the first step is centred at the start and the last at the end
+      const pos = 0.5 + tp * (n - 1);
+      // dim the steps while the background is still cream; full once green fills
+      const green = 0.35 + 0.65 * clamp((cp - 0.55) / 0.45, 0, 1);
       STEPS.forEach((step, i) => {
         const el = stepRefs.current[i];
         const img = imgRefs.current[i];
         if (!el) return;
         // fade this step in as its slot approaches, out as it passes
-        el.style.opacity = clamp(1 - Math.abs(pos - (i + 0.5)) / 0.6, 0, 1);
+        el.style.opacity = clamp(1 - Math.abs(pos - (i + 0.5)) / 0.6, 0, 1) * green;
         if (img) {
           const local = clamp(pos - i, 0, 1); // progress within this step
           img.style.transform = `translateY(${(0.5 - local) * 360}px)`;
