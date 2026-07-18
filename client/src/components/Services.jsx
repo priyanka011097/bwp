@@ -48,9 +48,9 @@ function ServiceIcon({ name }) {
 const SERVICES = [
   {
     icon: "strategy",
-    title: "Strategy & Discovery",
-    desc: "Where does your product stand? Not what it does, but who it's for. I start there and make sure everything else follows — the flow, the features, the roadmap.",
-    tags: ["Discovery", "Roadmap", "Scope"],
+    title: "AI Automation & Chatbots",
+    desc: "Put AI to work for your business — smart chatbots, assistants, and workflow automations that answer customers, capture leads, and save you hours every week.",
+    tags: ["Chatbots", "Automation", "AI"],
     bg: "#bad6ff",
   },
   {

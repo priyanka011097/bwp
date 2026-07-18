@@ -12,6 +12,12 @@ const QUOTES = [
   },
   {
     quote:
+      "Priyanka, you have done a great job making this website. The design is very light and easy to use, just as I envisioned it. The way you understood the assignment and delivered exactly what the brand needed impressed me. I look forward to working with you on future projects and will surely recommend you to anybody looking for a trustworthy, efficient, and visionary software developer. Kudos for the fantastic job you did!",
+    name: "Rajesh Das",
+    company: "Co-founder, Pintaboo",
+  },
+  {
+    quote:
       "Priyanka is an enthusiastic, self-motivated, and one of the most valuable community managers I have ever met — with great leadership skills and excellent knowledge in her field. She is very resourceful and always willing to share, with a positive, hands-on approach, explaining everything practically and clearly. Loved to work with her :)",
     name: "Sowmiya V",
     company: "Growth PM & Community Builder",
