@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import PillButton from "./PillButton.jsx";
 
 const TEXT =
   "I build software that adds an extra layer to everyday life. Strategy, design, web, apps, cloud: five services, one vision. What we make together will one day find its place in the world. Let's make it better.";
@@ -35,7 +36,7 @@ export default function Statement() {
   }, []);
 
   return (
-    <section className="statement" id="services">
+    <section className="statement" id="statement">
       <div className="statement__inner">
         <p className="statement__text" ref={textRef}>
           {TEXT.split(" ").map((word, i) => (
@@ -45,19 +46,7 @@ export default function Statement() {
           ))}
         </p>
 
-        <a className="statement__cta" href="#contact">
-          Start your project
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-            <path
-              d="M7 17L17 7M17 7H8M17 7V16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </a>
+        <PillButton href="#contact">Start your project</PillButton>
       </div>
     </section>
   );

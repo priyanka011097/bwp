@@ -387,9 +387,10 @@ body::-webkit-scrollbar {
 .about__heading {
   margin: 0 0 2rem;
   font-family: var(--font);
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(1.9rem, 4vw, 47px);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--cream);
 }
 
@@ -479,7 +480,7 @@ body::-webkit-scrollbar {
   padding: 0 3.5rem;
   text-align: center;
   font-family: var(--font);
-  font-size: clamp(1.9rem, 4vw, 3.75rem);
+  font-size: clamp(1.9rem, 4vw, 47px);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -601,9 +602,10 @@ body::-webkit-scrollbar {
 .approach__heading {
   margin: 0 0 1.75rem;
   font-family: var(--font);
-  font-size: clamp(2.5rem, 4.5vw, 4.25rem);
+  font-size: clamp(1.9rem, 4vw, 47px);
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.1;
   color: var(--ink);
 }
 
@@ -682,7 +684,7 @@ body::-webkit-scrollbar {
 .contact__heading {
   margin: 0 0 3rem;
   font-family: var(--font);
-  font-size: clamp(2rem, 4.5vw, 3.75rem);
+  font-size: clamp(1.9rem, 4vw, 47px);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -1361,7 +1363,7 @@ body::-webkit-scrollbar {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2.5rem;
+  gap: 1.5rem;
   padding: 3rem 1rem 5rem;
 }
 
@@ -1369,7 +1371,7 @@ body::-webkit-scrollbar {
   color: var(--ink);
   text-decoration: none;
   font-family: var(--font);
-  font-size: clamp(2rem, 5vw, 54px);
+  font-size: clamp(1.4rem, 3vw, 34px);
   font-weight: 500;
   line-height: 1;
   transition: opacity 0.15s ease;
@@ -1550,4 +1552,414 @@ body::-webkit-scrollbar {
   .svc-card__title {
     font-size: 1.6rem;
   }
+}
+
+/* ---------- Clients / customers ---------- */
+.clients {
+  background: var(--cream);
+  padding: 7rem 3.5rem 8rem;
+  text-align: center;
+}
+
+.clients__head {
+  margin-bottom: 5rem;
+}
+
+.clients__label {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--ink);
+}
+
+.clients__heading {
+  margin: 0;
+  font-family: var(--font);
+  font-size: clamp(1.9rem, 4vw, 47px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.clients__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3.5rem 2rem;
+  max-width: 1150px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.client-logo {
+  display: grid;
+  place-items: center;
+  min-height: 90px;
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.client-logo:hover {
+  opacity: 1;
+}
+
+/* ---------- Final CTA banner ---------- */
+.cta {
+  background: var(--cream);
+  padding: 4rem 3.5rem 12rem;
+}
+
+.cta__card {
+  position: relative;
+  overflow: hidden;
+  max-width: 1500px;
+  margin: 0 auto;
+  background: var(--blue);
+  border-radius: 40px;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: clamp(2rem, 4vw, 5rem);
+  align-items: center;
+  padding: clamp(2rem, 4vw, 4rem);
+}
+
+.cta__media {
+  margin: 0;
+  border-radius: 24px;
+  min-height: 460px;
+  overflow: hidden;
+  background: #cfe0f7;
+}
+
+.cta__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cta__content {
+  position: relative;
+  z-index: 1;
+}
+
+.cta__heading {
+  margin: 0 0 1.5rem;
+  font-family: var(--font);
+  font-size: clamp(1.9rem, 4vw, 47px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.cta__text {
+  margin: 0 0 2.5rem;
+  max-width: 46ch;
+  font-size: clamp(1.1rem, 1.4vw, 1.4rem);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.cta__btn-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--cream);
+  display: grid;
+  place-items: center;
+  transition: transform 0.25s ease;
+}
+
+.cta__btn:hover .cta__btn-circle {
+  transform: translate(4px, -4px);
+}
+
+.cta__btn-text {
+  background: var(--cream);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 1.15rem 2.5rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* decorative pale circles */
+.cta__circles span {
+  position: absolute;
+  bottom: -6%;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #ffffff, #cdddf3);
+  pointer-events: none;
+}
+
+.cta__circles span:nth-child(1) {
+  width: 22vw;
+  height: 22vw;
+  right: 20%;
+}
+
+.cta__circles span:nth-child(2) {
+  width: 20vw;
+  height: 20vw;
+  right: 6%;
+}
+
+.cta__circles span:nth-child(3) {
+  width: 16vw;
+  height: 16vw;
+  right: -4%;
+  bottom: 10%;
+}
+
+@media (max-width: 800px) {
+  .clients__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 1.5rem;
+  }
+  .cta__card {
+    grid-template-columns: 1fr;
+  }
+  .cta__media {
+    min-height: 260px;
+  }
+  .cta__circles {
+    display: none;
+  }
+}
+
+/* ---------- Page end: cream curves into a green footer ---------- */
+.cta {
+  position: relative;
+  z-index: 1;
+  border-bottom-left-radius: 48px;
+  border-bottom-right-radius: 48px;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 0;
+  margin-top: -48px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 6rem 3.5rem 2.5rem;
+}
+
+.footer__inner {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 3rem;
+  padding-bottom: 4rem;
+}
+
+.footer__logo {
+  height: 68px;
+  width: auto;
+  display: block;
+  margin: 0 0 1.25rem;
+}
+
+.footer__tagline {
+  margin: 0;
+  max-width: 30ch;
+  color: rgba(255, 247, 240, 0.7);
+}
+
+.footer__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footer__nav a {
+  font-size: 1.35rem;
+  color: var(--cream);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer__nav a:hover {
+  color: var(--blue);
+}
+
+.footer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer__contact a,
+.footer__contact span {
+  font-size: 1.15rem;
+  color: rgba(255, 247, 240, 0.9);
+  text-decoration: none;
+}
+
+.footer__contact a:hover {
+  color: var(--cream);
+}
+
+.footer__social {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.footer__social .footer__social-link {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--cream);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease;
+}
+
+.footer__social .footer__social-link:hover {
+  transform: translateY(-3px);
+}
+
+.footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 247, 240, 0.18);
+  font-size: 0.95rem;
+  color: rgba(255, 247, 240, 0.65);
+}
+
+.footer__legal {
+  display: flex;
+  gap: 1.75rem;
+}
+
+.footer__legal a {
+  color: rgba(255, 247, 240, 0.65);
+  text-decoration: none;
+}
+
+.footer__legal a:hover {
+  color: var(--cream);
+}
+
+@media (max-width: 800px) {
+  .site-footer {
+    padding: 4rem 1.5rem 2rem;
+  }
+  .footer__inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .footer__legal {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Reusable pill button (matches "See all work") ---------- */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font);
+}
+
+.pill-btn__pill {
+  background: var(--ink);
+  color: var(--blue);
+  border-radius: 999px;
+  padding: 1.15rem 2.5rem;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  white-space: nowrap;
+}
+
+.pill-btn__circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  overflow: hidden;
+  transition: width 0.35s ease, opacity 0.3s ease, margin 0.35s ease;
+}
+
+.pill-btn__circle svg {
+  width: 26px;
+  height: 26px;
+}
+
+.pill-btn__circle--left {
+  margin-right: 0.35rem;
+}
+
+.pill-btn__circle--right {
+  width: 0;
+  opacity: 0;
+  margin-left: 0;
+}
+
+.pill-btn:hover .pill-btn__circle--left {
+  width: 0;
+  opacity: 0;
+  margin-right: 0;
+}
+
+.pill-btn:hover .pill-btn__circle--right {
+  width: 64px;
+  opacity: 1;
+  margin-left: 0.35rem;
+}
+
+/* Light variant for dark/green backgrounds */
+.pill-btn--light .pill-btn__pill {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+/* Variant for the blue CTA card: white pill + dark circle so it reads on blue */
+.pill-btn--oncard .pill-btn__pill {
+  background: #ffffff;
+  color: var(--ink);
+}
+
+.pill-btn--oncard .pill-btn__circle {
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* Anchor placed where the "How I Work" heading is visible */
+.process__anchor {
+  position: absolute;
+  top: 55vh;
+  left: 0;
+  width: 1px;
+  height: 1px;
 }

@@ -7,6 +7,8 @@ import Services from "./components/Services.jsx";
 import About from "./components/About.jsx";
 import Approach from "./components/Approach.jsx";
 import Testimonials from "./components/Testimonials.jsx";
+import CTA from "./components/CTA.jsx";
+import Footer from "./components/Footer.jsx";
 import Contact from "./components/Contact.jsx";
 
 export default function App() {
@@ -22,6 +24,8 @@ export default function App() {
       <About />
       <Approach />
       <Testimonials />
+      <CTA />
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import leftImg from "../assets/aboutusleft.jpg";
 import rightImg from "../assets/aboutusright.png";
+import PillButton from "./PillButton.jsx";
 
 export default function Approach() {
   return (
@@ -17,21 +18,7 @@ export default function Approach() {
           surprises — every decision has a reason.
         </p>
 
-        <a className="approach__cta" href="#contact">
-          <span className="approach__cta-text">Discover my approach</span>
-          <span className="approach__cta-circle" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22">
-              <path
-                d="M4 12h15M13 6l6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-        </a>
+        <PillButton href="#contact">Discover my approach</PillButton>
       </div>
 
       <figure className="approach__img approach__img--right">

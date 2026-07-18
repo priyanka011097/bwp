@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import Logo from "./Logo.jsx";
 
-const NAV_ITEMS = ["Home", "Services", "About Me", "Contact Me"];
+const NAV_ITEMS = [
+  { label: "Home", href: "#" },
+  { label: "My work", href: "#work" },
+  { label: "Contact", href: "#contact" },
+  { label: "Services", href: "#services" },
+  { label: "About me", href: "#about" },
+  { label: "How I work", href: "#approach" },
+  { label: "Talk to AI bot", href: "#cta" },
+];
 const CLOSE_MS = 600;
 
 export default function Header({ showLogo = true }) {
@@ -79,12 +87,12 @@ export default function Header({ showLogo = true }) {
             <nav className="menu-nav">
               {NAV_ITEMS.map((item) => (
                 <a
-                  key={item}
+                  key={item.label}
                   className="menu-nav__link"
-                  href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
+                  href={item.href}
                   onClick={closeMenu}
                 >
-                  {item}
+                  {item.label}
                 </a>
               ))}
             </nav>

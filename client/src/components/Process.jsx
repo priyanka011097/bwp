@@ -76,7 +76,8 @@ export default function Process() {
   }, []);
 
   return (
-    <section className="process" id="process" ref={sectionRef}>
+    <section className="process" ref={sectionRef}>
+      <span id="process" className="process__anchor" aria-hidden="true" />
       <div className="process__inner">
         <div className="process__circle" ref={circleRef} aria-hidden="true" />
         {STEPS.map((step, i) => {

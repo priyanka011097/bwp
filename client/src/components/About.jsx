@@ -1,4 +1,5 @@
 import aboutImg from "../assets/aboutus.jpg";
+import PillButton from "./PillButton.jsx";
 
 export default function About() {
   return (
@@ -13,21 +14,9 @@ export default function About() {
           decision counts.
         </p>
 
-        <a className="about__cta" href="#contact">
-          <span className="about__cta-text">Read my story</span>
-          <span className="about__cta-circle" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22">
-              <path
-                d="M4 12h15M13 6l6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-        </a>
+        <PillButton href="#contact" variant="light">
+          Read my story
+        </PillButton>
       </div>
 
       <figure className="about__media">
