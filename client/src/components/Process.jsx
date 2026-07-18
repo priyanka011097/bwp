@@ -14,9 +14,9 @@ const STEPS = [
 export default function Process() {
   const sectionRef = useRef(null);
   const circleRef = useRef(null);
-  const trackRef = useRef(null);
   const headingRef = useRef(null);
-  const wordRefs = useRef([]);
+  const stepRefs = useRef([]);
+  const imgRefs = useRef([]);
 
   useEffect(() => {
     let raf = 0;
@@ -29,8 +29,9 @@ export default function Process() {
       const total = rect.height - window.innerHeight;
       const p = clamp(-rect.top / total, 0, 1);
 
-      // Circle starts opening right away (no empty lead-in), fills over ~45%
-      const cp = clamp(p / 0.45, 0, 1);
+      // Circle fills over ~45%, easing out so green rises fast at the start
+      const cpRaw = clamp(p / 0.45, 0, 1);
+      const cp = 1 - Math.pow(1 - cpRaw, 2); // ease-out
       const tp = clamp((p - 0.45) / 0.55, 0, 1);
       if (circleRef.current) {
         const diameter = 2 * Math.hypot(window.innerWidth / 2, window.innerHeight) * 1.04;
@@ -44,21 +45,20 @@ export default function Process() {
         headingRef.current.style.opacity =
           clamp((cp - 0.5) / 0.5, 0, 1) * clamp(1 - tp / 0.12, 0, 1);
 
-      // Steps fade in as the green fills, then the stack scrolls to center each row
-      if (trackRef.current) {
-        const track = trackRef.current;
-        const vh = window.innerHeight;
-        const rowH = track.firstElementChild
-          ? track.firstElementChild.offsetHeight
-          : 300;
-        const trackH = track.scrollHeight;
-        // Slide the whole stack from the bottom up to the top — one row at a time
-        const startY = vh - rowH; // first row sits near the bottom
-        const range = vh + trackH - 2 * rowH; // travel: bottom → top
-        const y = startY - tp * range;
-        track.style.transform = `translateY(${y}px)`;
-        track.style.opacity = clamp((cp - 0.55) / 0.45, 0, 1);
-      }
+      // Each step: the word holds its place; only its image slides in/out beside it
+      const n = STEPS.length;
+      const pos = tp * n; // 0..n
+      STEPS.forEach((step, i) => {
+        const el = stepRefs.current[i];
+        const img = imgRefs.current[i];
+        if (!el) return;
+        // fade this step in as its slot approaches, out as it passes
+        el.style.opacity = clamp(1 - Math.abs(pos - (i + 0.5)) / 0.6, 0, 1);
+        if (img) {
+          const local = clamp(pos - i, 0, 1); // progress within this step
+          img.style.transform = `translateY(${(0.5 - local) * 360}px)`;
+        }
+      });
     };
 
     const onScroll = () => {
@@ -76,32 +76,34 @@ export default function Process() {
   }, []);
 
   return (
-    <section className="process" id="approach" ref={sectionRef}>
+    <section className="process" id="process" ref={sectionRef}>
       <div className="process__inner">
         <div className="process__circle" ref={circleRef} aria-hidden="true" />
-        <div className="pstep-track" ref={trackRef}>
-          {STEPS.map((step, i) => {
-            const word = (
-              <h2
-                className="pstep__word"
-                ref={(el) => (wordRefs.current[i] = el)}
-                key="w"
-              >
-                {step.word}
-              </h2>
-            );
-            const image = (
-              <figure className="pstep__img" key="i">
-                <img src={step.img} alt="" />
-              </figure>
-            );
-            return (
-              <div className={`pstep pstep--${step.side}`} key={step.word}>
-                {step.side === "left" ? [word, image] : [image, word]}
-              </div>
-            );
-          })}
-        </div>
+        {STEPS.map((step, i) => {
+          const word = (
+            <h2 className="pstep__word" key="w">
+              {step.word}
+            </h2>
+          );
+          const image = (
+            <figure
+              className="pstep__img"
+              key="i"
+              ref={(el) => (imgRefs.current[i] = el)}
+            >
+              <img src={step.img} alt="" />
+            </figure>
+          );
+          return (
+            <div
+              className={`pstep pstep--${step.side}`}
+              ref={(el) => (stepRefs.current[i] = el)}
+              key={step.word}
+            >
+              {step.side === "left" ? [word, image] : [image, word]}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

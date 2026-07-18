@@ -5,6 +5,9 @@ import Cases from "./components/Cases.jsx";
 import Process from "./components/Process.jsx";
 import Services from "./components/Services.jsx";
 import About from "./components/About.jsx";
+import Approach from "./components/Approach.jsx";
+import Testimonials from "./components/Testimonials.jsx";
+import Contact from "./components/Contact.jsx";
 
 export default function App() {
   return (
@@ -13,9 +16,12 @@ export default function App() {
       <Hero />
       <Statement />
       <Cases />
+      <Contact />
       <Process />
       <Services />
       <About />
+      <Approach />
+      <Testimonials />
     </div>
   );
 }
