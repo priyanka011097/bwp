@@ -16,6 +16,11 @@ export function login(password) {
   return sign({ exp: Date.now() + TTL_MS });
 }
 
+// Issue a session token directly (used after Google sign-in is verified)
+export function issueToken() {
+  return sign({ exp: Date.now() + TTL_MS });
+}
+
 export function verify(token) {
   if (!token) return false;
   const [body, sig] = token.split(".");

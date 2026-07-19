@@ -11,6 +11,10 @@ export default function Contact() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!Number(form.budget) || Number(form.budget) <= 0) {
+      alert("Please enter a budget amount greater than 0.");
+      return;
+    }
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -100,9 +104,12 @@ export default function Contact() {
 
           <label className="field">
             <span>What's your budget?</span>
-            <textarea
+            <input
               name="budget"
-              rows="2"
+              type="number"
+              min="1"
+              step="1"
+              inputMode="numeric"
               value={form.budget}
               onChange={handle}
               placeholder="I don't generate a quote — I ask your budget and fit everything in that."

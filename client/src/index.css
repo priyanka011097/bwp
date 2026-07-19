@@ -1986,3 +1986,9 @@ body::-webkit-scrollbar {
   font-weight: 600;
   text-align: center;
 }
+
+.field__hint {
+  font-size: 0.9rem;
+  color: #7d8a80;
+  font-weight: 500;
+}

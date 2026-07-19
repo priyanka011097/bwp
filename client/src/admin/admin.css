@@ -244,3 +244,129 @@
   color: #3c554a;
   font-size: 0.9rem;
 }
+
+.adm-or {
+  text-align: center;
+  color: #9aa79c;
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+.adm-gbtn {
+  display: flex;
+  justify-content: center;
+}
+
+/* Enquiries table */
+.adm-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.adm-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7d72;
+  padding: 0.9rem 1rem;
+  border-bottom: 2px solid #e6eae7;
+  white-space: nowrap;
+}
+
+.adm-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #eef1ed;
+  vertical-align: top;
+  color: #17392a;
+}
+
+.adm-table tr:last-child td {
+  border-bottom: none;
+}
+
+.adm-table a {
+  color: #17392a;
+}
+
+.adm-td-date {
+  white-space: nowrap;
+  color: #6b7d72;
+  font-size: 0.82rem;
+}
+
+.adm-td-idea {
+  min-width: 240px;
+  max-width: 420px;
+  white-space: pre-wrap;
+}
+
+.adm-td-del {
+  font: inherit;
+  border: none;
+  background: #f4dcda;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+/* Dashboard */
+.adm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.adm-stat {
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  background: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 1.5rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.adm-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.adm-stat__value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #17392a;
+  line-height: 1;
+}
+
+.adm-stat__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7d72;
+}
+
+.adm-dash__h {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+  color: #17392a;
+}
+
+@media (max-width: 720px) {
+  .adm-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
