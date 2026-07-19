@@ -6,6 +6,8 @@ import {
   setCollection,
   addEnquiry,
   deleteFrom,
+  getSettings,
+  setSettings,
 } from "./store.js";
 import { issueToken, requireAuth } from "./auth.js";
 import { OAuth2Client } from "google-auth-library";
@@ -117,6 +119,23 @@ app.get("/api/admin/enquiries", requireAuth, async (req, res) => {
 app.delete("/api/admin/enquiries/:id", requireAuth, async (req, res) => {
   try {
     res.json(await deleteFrom("enquiries", req.params.id));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ---- Admin: site settings (resume PDF) ----
+app.get("/api/admin/settings", requireAuth, async (req, res) => {
+  try {
+    res.json(await getSettings());
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.put("/api/admin/settings", requireAuth, async (req, res) => {
+  try {
+    res.json(await setSettings(req.body || {}));
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

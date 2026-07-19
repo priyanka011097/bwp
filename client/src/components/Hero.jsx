@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import heroImg1 from "../assets/heroimg1.jpg";
 import heroImg2 from "../assets/heroimg2.jpg";
 
@@ -7,6 +7,14 @@ export default function Hero() {
   const line2Ref = useRef(null);
   const personRef = useRef(null);
   const shelfRef = useRef(null);
+  const [resume, setResume] = useState("");
+
+  useEffect(() => {
+    fetch("/api/content")
+      .then((r) => r.json())
+      .then((c) => setResume(c?.settings?.resume || ""))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const SPEED = 0.6; // px moved per px scrolled
@@ -53,8 +61,13 @@ export default function Hero() {
         <img src={heroImg1} alt="" />
       </figure>
 
-      {/* Rotating scroll badge */}
-      <a className="hero__badge" href="#services" aria-label="How we roll — scroll down">
+      {/* Rotating resume-download badge */}
+      <a
+        className="hero__badge"
+        href={resume || "#contact"}
+        {...(resume ? { download: "", target: "_blank", rel: "noreferrer" } : {})}
+        aria-label="Download my resume"
+      >
         <svg className="hero__badge-ring" viewBox="0 0 140 140" aria-hidden="true">
           <defs>
             <path
@@ -64,7 +77,7 @@ export default function Hero() {
           </defs>
           <text>
             <textPath href="#badge-circle" startOffset="0">
-              HOW WE ROLL • HOW WE ROLL •&nbsp;
+              DOWNLOAD MY RESUME •&nbsp;
             </textPath>
           </text>
         </svg>

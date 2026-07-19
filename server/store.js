@@ -156,7 +156,25 @@ export async function getContent() {
     const d = docs.find((x) => x._id === key);
     out[key] = d ? d.items : [];
   }
+  out.settings = await getSettings();
   return out;
+}
+
+// Site settings (single document). Currently holds the resume PDF URL.
+export async function getSettings() {
+  const database = await db();
+  const doc = await database.collection("content").findOne({ _id: "settings" });
+  return { resume: doc?.resume || "" };
+}
+
+export async function setSettings(patch) {
+  const database = await db();
+  const allowed = {};
+  if (typeof patch.resume === "string") allowed.resume = patch.resume;
+  await database
+    .collection("content")
+    .updateOne({ _id: "settings" }, { $set: allowed }, { upsert: true });
+  return getSettings();
 }
 
 export async function getCollection(name) {

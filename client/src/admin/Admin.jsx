@@ -154,6 +154,91 @@ function Enquiries({ token }) {
   );
 }
 
+/* ---------------- Resume ---------------- */
+function Resume({ token }) {
+  const [url, setUrl] = useState("");
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    fetch(`${API}/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((s) => setUrl(s.resume || ""))
+      .catch(() => {});
+  }, []);
+
+  const save = async (resume) => {
+    setStatus("Saving…");
+    const res = await fetch(`${API}/admin/settings`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ resume }),
+    });
+    setStatus(res.ok ? "Saved ✓" : "Error saving");
+    setTimeout(() => setStatus(""), 2000);
+  };
+
+  const upload = async (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    setStatus("Uploading…");
+    const res = await fetch(`${API}/admin/upload`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    });
+    if (!res.ok) {
+      setStatus("Upload failed");
+      setTimeout(() => setStatus(""), 2000);
+      return;
+    }
+    const { url: newUrl } = await res.json();
+    setUrl(newUrl);
+    await save(newUrl);
+  };
+
+  return (
+    <div className="adm-coll">
+      <div className="adm-item">
+        <label className="adm-field">
+          <span>Resume PDF</span>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => {
+              const f = e.target.files[0];
+              if (f) upload(f);
+            }}
+          />
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Upload a PDF above, or paste a URL"
+          />
+          {url && (
+            <span className="adm-media-preview">
+              Current:{" "}
+              <a href={url} target="_blank" rel="noreferrer">
+                {url}
+              </a>
+            </span>
+          )}
+        </label>
+        <div className="adm-coll__actions">
+          <button className="adm-save" onClick={() => save(url)}>
+            Save changes
+          </button>
+          <span className="adm-status">{status}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Generic collection editor ---------------- */
 const FIELDS = {
   cases: [
@@ -400,7 +485,7 @@ function Dashboard({ token, onGo }) {
 }
 
 /* ---------------- Shell ---------------- */
-const TABS = ["dashboard", "enquiries", "cases", "testimonials", "services"];
+const TABS = ["dashboard", "enquiries", "cases", "testimonials", "services", "resume"];
 
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem("adminToken"));
@@ -438,6 +523,8 @@ export default function Admin() {
           <Dashboard token={token} onGo={setTab} />
         ) : tab === "enquiries" ? (
           <Enquiries token={token} />
+        ) : tab === "resume" ? (
+          <Resume token={token} />
         ) : (
           <Collection token={token} type={tab} />
         )}
