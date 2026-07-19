@@ -163,17 +163,19 @@ export async function getContent() {
   return out;
 }
 
-// Site settings (single document). Currently holds the resume PDF URL.
+// Site settings (single document). Holds the resume PDF URL and the chatbot
+// knowledge ("about Priyanka") text.
 export async function getSettings() {
   const database = await db();
   const doc = await database.collection("content").findOne({ _id: "settings" });
-  return { resume: doc?.resume || "" };
+  return { resume: doc?.resume || "", knowledge: doc?.knowledge || "" };
 }
 
 export async function setSettings(patch) {
   const database = await db();
   const allowed = {};
   if (typeof patch.resume === "string") allowed.resume = patch.resume;
+  if (typeof patch.knowledge === "string") allowed.knowledge = patch.knowledge;
   await database
     .collection("content")
     .updateOne({ _id: "settings" }, { $set: allowed }, { upsert: true });
@@ -206,6 +208,33 @@ export async function addEnquiry(enquiry) {
   const database = await db();
   await database.collection("enquiries").insertOne({ ...enquiry });
   return enquiry;
+}
+
+// ---- Chatbot conversations ----
+export async function saveConversation(sessionId, messages) {
+  const database = await db();
+  const now = new Date().toISOString();
+  await database.collection("conversations").updateOne(
+    { _id: sessionId },
+    { $set: { messages, updatedAt: now }, $setOnInsert: { createdAt: now } },
+    { upsert: true }
+  );
+}
+
+export async function getConversations() {
+  const database = await db();
+  return database
+    .collection("conversations")
+    .find({})
+    .sort({ updatedAt: -1 })
+    .limit(200)
+    .toArray();
+}
+
+export async function deleteConversation(id) {
+  const database = await db();
+  await database.collection("conversations").deleteOne({ _id: id });
+  return getConversations();
 }
 
 // ---- Uploaded files (stored in MongoDB so they persist on serverless) ----

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import chatImg from "../assets/chat.jpg";
 import PillButton from "./PillButton.jsx";
 
@@ -18,7 +19,7 @@ export default function CTA() {
             both quickly see if we click.
           </p>
 
-          <PillButton href="#contact" variant="oncard">
+          <PillButton as={Link} to="/chat" variant="oncard">
             Talk to my AI Bot
           </PillButton>
         </div>

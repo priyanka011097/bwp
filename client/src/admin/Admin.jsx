@@ -239,6 +239,161 @@ function Resume({ token }) {
   );
 }
 
+/* ---------------- Chat history ---------------- */
+function Conversations({ token }) {
+  const [items, setItems] = useState([]);
+  const [open, setOpen] = useState(null);
+
+  const load = () =>
+    fetch(`${API}/admin/conversations`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d) => setItems(Array.isArray(d) ? d : []))
+      .catch(() => {});
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const remove = async (id) => {
+    if (!confirm("Delete this conversation?")) return;
+    await fetch(`${API}/admin/conversations/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    load();
+  };
+
+  if (!items.length) return <p className="adm-empty">No conversations yet.</p>;
+
+  return (
+    <div className="adm-chats">
+      {items.map((c) => {
+        const firstUser = c.messages?.find((m) => m.role === "user");
+        const isOpen = open === c._id;
+        return (
+          <div className="adm-chat" key={c._id}>
+            <div
+              className="adm-chat__head"
+              onClick={() => setOpen(isOpen ? null : c._id)}
+            >
+              <span className="adm-chat__when">
+                {new Date(c.updatedAt).toLocaleString()}
+              </span>
+              <span className="adm-chat__preview">
+                {firstUser ? firstUser.content : "—"}
+              </span>
+              <span className="adm-chat__count">
+                {c.messages?.length || 0} msgs
+              </span>
+              <button
+                className="adm-td-del"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(c._id);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+            {isOpen && (
+              <div className="adm-chat__body">
+                {c.messages?.map((m, i) => (
+                  <div
+                    key={i}
+                    className={`adm-bubble adm-bubble--${
+                      m.role === "user" ? "user" : "bot"
+                    }`}
+                  >
+                    {m.content}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------------- Chatbot knowledge ---------------- */
+function Chatbot({ token }) {
+  const [text, setText] = useState("");
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    fetch(`${API}/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((s) => setText(s.knowledge || ""))
+      .catch(() => {});
+  }, []);
+
+  const save = async () => {
+    setStatus("Saving…");
+    const r = await fetch(`${API}/admin/settings`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ knowledge: text }),
+    });
+    setStatus(r.ok ? "Saved ✓" : "Error saving");
+    setTimeout(() => setStatus(""), 2000);
+  };
+
+  return (
+    <div className="adm-coll">
+      <div className="adm-item">
+        <p>
+          Write everything the AI bot should know about you — your bio, services,
+          projects, FAQs, and the tone it should use. The chatbot reads this on
+          every conversation, and only answers using what you put here. Update it
+          anytime.
+        </p>
+        <label className="adm-field">
+          <span>Bot knowledge (About Priyanka)</span>
+          <textarea
+            rows="20"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={`Example:
+
+I'm Priyanka, a software developer based in Navi Mumbai. I help entrepreneurs turn ideas into products.
+
+What I do:
+- AI automation & chatbots
+- Web development (React)
+- Mobile apps
+- Cloud & APIs
+- Growth & SEO
+
+Projects:
+- Pintaboo.com — ...
+- Proease Global — ...
+
+FAQs:
+- How do you price? I ask your budget and fit the work into it.
+- How long does a project take? Usually ...
+
+Tone: friendly, casual, encouraging.`}
+          />
+        </label>
+        <div className="adm-coll__actions">
+          <button className="adm-save" onClick={save}>
+            Save changes
+          </button>
+          <span className="adm-status">{status}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Generic collection editor ---------------- */
 const FIELDS = {
   cases: [
@@ -485,7 +640,7 @@ function Dashboard({ token, onGo }) {
 }
 
 /* ---------------- Shell ---------------- */
-const TABS = ["dashboard", "enquiries", "cases", "testimonials", "services", "resume"];
+const TABS = ["dashboard", "enquiries", "chats", "cases", "testimonials", "services", "resume", "chatbot"];
 
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem("adminToken"));
@@ -523,8 +678,12 @@ export default function Admin() {
           <Dashboard token={token} onGo={setTab} />
         ) : tab === "enquiries" ? (
           <Enquiries token={token} />
+        ) : tab === "chats" ? (
+          <Conversations token={token} />
         ) : tab === "resume" ? (
           <Resume token={token} />
+        ) : tab === "chatbot" ? (
+          <Chatbot token={token} />
         ) : (
           <Collection token={token} type={tab} />
         )}

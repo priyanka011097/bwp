@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { label: "Services", href: "#services" },
   { label: "About me", href: "#about" },
   { label: "How I work", href: "#approach" },
-  { label: "Talk to AI bot", href: "#cta" },
+  { label: "Talk to AI bot", href: "/chat" },
 ];
 const CLOSE_MS = 600;
 
