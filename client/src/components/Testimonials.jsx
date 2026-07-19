@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
+import { useContent } from "../useContent.js";
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
-const QUOTES = [
+const DEFAULT_QUOTES = [
   {
     quote:
       "I am extremely happy with the website created for Proease Global. Thank you for designing such a beautiful, professional, and user-friendly website with exceptional creativity and attention to detail. You perfectly understood my vision and transformed it into a website that truly reflects my brand. What impressed me most was the speed of delivery without compromising on quality — every interaction was smooth, effortless, and highly professional. I highly recommend your services to anyone looking for a creative, reliable, and dedicated web designer!",
@@ -59,6 +60,7 @@ function QuoteMark() {
 export default function Testimonials() {
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
+  const QUOTES = useContent("testimonials", DEFAULT_QUOTES);
 
   useEffect(() => {
     let raf = 0;

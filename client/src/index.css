@@ -1975,3 +1975,14 @@ body::-webkit-scrollbar {
   width: 1px;
   height: 1px;
 }
+
+/* Contact success message */
+.contact__sent {
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: var(--blue);
+  color: var(--ink);
+  font-weight: 600;
+  text-align: center;
+}

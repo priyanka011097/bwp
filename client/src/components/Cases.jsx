@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useContent } from "../useContent.js";
 import pintaboo from "../assets/pintaboo.mp4";
 import proeaseglobal from "../assets/proeaseglobal.mp4";
 
@@ -42,7 +43,7 @@ function TagIcon({ name }) {
   }
 }
 
-const CASES = [
+const DEFAULT_CASES = [
   {
     title: "Pintaboo.com",
     src: pintaboo,
@@ -72,9 +73,29 @@ const PETALS = Array.from({ length: 8 }, (_, i) => {
   return { cx: 80 + 30 * Math.cos(a), cy: 80 + 30 * Math.sin(a) };
 });
 
+const TAG_ICONS = ["science", "identity", "print", "web"];
+
 export default function Cases() {
   const cursorRef = useRef(null);
   const [active, setActive] = useState(false);
+  const raw = useContent("cases", DEFAULT_CASES);
+  // keep the bundled video (by index) for API items; map string tags to icons
+  const CASES = raw.map((c, i) => {
+    if (c.src) return c; // built-in default
+    const d = DEFAULT_CASES[i % DEFAULT_CASES.length];
+    return {
+      title: c.title ?? d.title,
+      href: c.href ?? d.href,
+      src: c.video || d.src,
+      tags: Array.isArray(c.tags)
+        ? c.tags.map((t, j) =>
+            typeof t === "string"
+              ? { icon: TAG_ICONS[j % TAG_ICONS.length], label: t }
+              : t
+          )
+        : d.tags,
+    };
+  });
 
   useEffect(() => {
     const onMove = (e) => {

@@ -5,11 +5,27 @@ const EMPTY = { name: "", email: "", phone: "", idea: "", budget: "" };
 
 export default function Contact() {
   const [form, setForm] = useState(EMPTY);
+  const [sent, setSent] = useState(false);
 
   const handle = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setSent(true);
+        setForm(EMPTY);
+        return;
+      }
+    } catch {
+      // fall through to email fallback
+    }
+    // Fallback (e.g. static deploy with no backend): open email app
     const lines = [
       `Name: ${form.name}`,
       `Email: ${form.email}`,
@@ -17,9 +33,8 @@ export default function Contact() {
       `Idea: ${form.idea}`,
       `Budget: ${form.budget}`,
     ].join("\n");
-    const subject = `New project enquiry — ${form.name || "someone"}`;
     window.location.href = `mailto:hello@buildwithpriyanka.in?subject=${encodeURIComponent(
-      subject
+      `New project enquiry — ${form.name || "someone"}`
     )}&body=${encodeURIComponent(lines)}`;
   };
 
@@ -28,6 +43,12 @@ export default function Contact() {
       <div className="contact__inner">
         <p className="contact__label">CONTACT</p>
         <h2 className="contact__heading">Start your project</h2>
+
+        {sent && (
+          <p className="contact__sent">
+            Thanks — your message is in. I'll get back to you soon.
+          </p>
+        )}
 
         <form className="contact__form" onSubmit={submit}>
           <div className="contact__row">

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useContent } from "../useContent.js";
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
@@ -45,7 +46,7 @@ function ServiceIcon({ name }) {
   }
 }
 
-const SERVICES = [
+const DEFAULT_SERVICES = [
   {
     icon: "strategy",
     title: "AI Automation & Chatbots",
@@ -87,6 +88,11 @@ const SERVICES = [
 export default function Services() {
   const sectionRef = useRef(null);
   const trackRef = useRef(null);
+  const raw = useContent("services", DEFAULT_SERVICES);
+  // keep icon/bg from defaults (by index) for items coming from the API
+  const SERVICES = raw.map((s, i) =>
+    s.icon ? s : { ...DEFAULT_SERVICES[i % DEFAULT_SERVICES.length], ...s }
+  );
 
   useEffect(() => {
     let raf = 0;

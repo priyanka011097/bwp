@@ -3,3 +3,6 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Runtime data store (regenerated from seeds; use your own DB in prod)
+server/data/

@@ -1,0 +1,246 @@
+.adm,
+.adm-login {
+  min-height: 100vh;
+  background: #eef1ed;
+  color: #17392a;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Login */
+.adm-login {
+  display: grid;
+  place-items: center;
+}
+
+.adm-login__box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: min(90vw, 360px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.adm-login__box h1 {
+  margin: 0;
+}
+
+.adm-login__box p {
+  margin: 0 0 1rem;
+  color: #6b7d72;
+}
+
+.adm-login__box input,
+.adm-field input,
+.adm-field textarea {
+  font: inherit;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #cfd6d1;
+  border-radius: 10px;
+  background: #fff;
+  color: #17392a;
+}
+
+.adm-login__box button {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 999px;
+  background: #17392a;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.adm-error {
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
+/* Shell */
+.adm-top {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: #17392a;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.adm-top h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.adm-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.adm-tabs button {
+  text-transform: capitalize;
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+}
+
+.adm-tabs button.is-active {
+  background: #b9d4f5;
+  color: #17392a;
+  font-weight: 700;
+}
+
+.adm-logout {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.adm-body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+.adm-empty {
+  color: #6b7d72;
+}
+
+/* Enquiries */
+.adm-enq {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.adm-enq__card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.adm-enq__head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.adm-enq__head span {
+  color: #6b7d72;
+  font-size: 0.85rem;
+}
+
+.adm-enq__head button {
+  margin-left: auto;
+  font: inherit;
+  border: none;
+  background: #f4dcda;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.adm-enq__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0.6rem 0;
+  color: #3c554a;
+  font-size: 0.9rem;
+}
+
+.adm-enq__idea {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Collections */
+.adm-coll {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.adm-item {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  position: relative;
+}
+
+.adm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.adm-field span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7d72;
+}
+
+.adm-remove {
+  align-self: flex-start;
+  font: inherit;
+  border: none;
+  background: #f4dcda;
+  color: #c0392b;
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.adm-coll__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.adm-add {
+  font: inherit;
+  border: 1.5px dashed #9aa79c;
+  background: transparent;
+  color: #17392a;
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+}
+
+.adm-save {
+  font: inherit;
+  border: none;
+  background: #17392a;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.7rem 1.6rem;
+  cursor: pointer;
+}
+
+.adm-status {
+  color: #3c554a;
+  font-size: 0.9rem;
+}
