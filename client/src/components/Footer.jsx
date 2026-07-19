@@ -80,7 +80,6 @@ export default function Footer() {
       </div>
 
       <div className="footer__bottom">
-        <span>© 2026 Build With Priyanka.in</span>
         <div className="footer__legal">
           <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
             Privacy &amp; Cookies
@@ -89,6 +88,7 @@ export default function Footer() {
             Terms &amp; Conditions
           </a>
         </div>
+        <span>© 2026 Build With Priyanka.in</span>
       </div>
     </footer>
   );

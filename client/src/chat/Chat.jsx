@@ -52,6 +52,7 @@ export default function Chat() {
   const [messages, setMessages] = useState([GREETING]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resume, setResume] = useState("");
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const sessionId = useRef(getSessionId());
@@ -65,6 +66,10 @@ export default function Chat() {
 
   useEffect(() => {
     inputRef.current?.focus();
+    fetch("/api/content")
+      .then((r) => r.json())
+      .then((c) => setResume(c?.settings?.resume || ""))
+      .catch(() => {});
   }, []);
 
   const send = async (text) => {
@@ -175,6 +180,17 @@ export default function Chat() {
         <a className="chat__action" href="/#contact">
           📝 Fill contact form
         </a>
+        {resume && (
+          <a
+            className="chat__action"
+            href={resume}
+            target="_blank"
+            rel="noreferrer"
+            download
+          >
+            ⬇ Download resume
+          </a>
+        )}
         <a
           className="chat__action chat__action--wa"
           href={WHATSAPP}

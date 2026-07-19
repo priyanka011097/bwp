@@ -1851,6 +1851,7 @@ body::-webkit-scrollbar {
   justify-content: space-between;
   gap: 1.5rem;
   padding-top: 2rem;
+  padding-right: 160px; /* keep copyright clear of the floating AI bot */
   border-top: 1px solid rgba(255, 247, 240, 0.18);
   font-size: 0.95rem;
   color: rgba(255, 247, 240, 0.65);
@@ -1882,6 +1883,8 @@ body::-webkit-scrollbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding-right: 0;
+    padding-bottom: 5.5rem; /* clear the floating AI bot on small screens */
   }
   .footer__legal {
     flex-wrap: wrap;
@@ -1991,4 +1994,75 @@ body::-webkit-scrollbar {
   font-size: 0.9rem;
   color: #7d8a80;
   font-weight: 500;
+}
+
+/* ---- Floating AI bot launcher (bottom-right) ---- */
+.floating-bot {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.floating-bot__label {
+  background: var(--ink, #17392a);
+  color: var(--cream, #fff7f0);
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.floating-bot:hover .floating-bot__label {
+  opacity: 1;
+  transform: translateX(0);
+}
+.floating-bot__video {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ink, #17392a);
+  /* border: 3px solid var(--cream, #fff7f0); */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  animation: bot-pulse 2.6s infinite;
+  transition: transform 0.2s ease;
+}
+.floating-bot:hover .floating-bot__video {
+  transform: scale(1.06);
+}
+.floating-bot__video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+@keyframes bot-pulse {
+  0% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 0 0 0 rgba(23, 57, 42, 0.4);
+  }
+  70% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 0 0 16px rgba(23, 57, 42, 0);
+  }
+  100% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 0 0 0 rgba(23, 57, 42, 0);
+  }
+}
+@media (max-width: 600px) {
+  .floating-bot {
+    right: 16px;
+    bottom: 16px;
+  }
+  .floating-bot__video {
+    width: 72px;
+    height: 72px;
+  }
 }

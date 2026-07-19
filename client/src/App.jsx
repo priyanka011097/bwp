@@ -10,6 +10,7 @@ import Testimonials from "./components/Testimonials.jsx";
 import CTA from "./components/CTA.jsx";
 import Footer from "./components/Footer.jsx";
 import Contact from "./components/Contact.jsx";
+import FloatingBot from "./components/FloatingBot.jsx";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
       <Testimonials />
       <CTA />
       <Footer />
+      <FloatingBot />
     </div>
   );
 }
