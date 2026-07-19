@@ -6,15 +6,18 @@
 // single document { _id, items: [...] } to preserve order. Enquiries are one
 // document per submission.
 // ---------------------------------------------------------------------------
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import dns from "dns";
 
-// Some networks can't resolve Atlas SRV records via the default resolver
-// (querySrv ECONNREFUSED). Use public DNS servers for the lookup.
-try {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-} catch {
-  /* ignore */
+// Some local networks can't resolve Atlas SRV records via the default resolver
+// (querySrv ECONNREFUSED). Use public DNS servers for the lookup. On Vercel the
+// default resolver works fine, so leave it alone there.
+if (!process.env.VERCEL) {
+  try {
+    dns.setServers(["8.8.8.8", "1.1.1.1"]);
+  } catch {
+    /* ignore */
+  }
 }
 
 const URI = process.env.MONGODB_URI || "";
@@ -203,6 +206,24 @@ export async function addEnquiry(enquiry) {
   const database = await db();
   await database.collection("enquiries").insertOne({ ...enquiry });
   return enquiry;
+}
+
+// ---- Uploaded files (stored in MongoDB so they persist on serverless) ----
+export async function saveFile({ filename, contentType, data }) {
+  const database = await db();
+  const result = await database.collection("uploads").insertOne({
+    filename,
+    contentType,
+    data,
+    createdAt: new Date().toISOString(),
+  });
+  return result.insertedId.toString();
+}
+
+export async function getFile(id) {
+  if (!ObjectId.isValid(id)) return null;
+  const database = await db();
+  return database.collection("uploads").findOne({ _id: new ObjectId(id) });
 }
 
 export async function deleteFrom(name, id) {

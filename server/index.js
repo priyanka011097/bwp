@@ -8,25 +8,20 @@ import {
   deleteFrom,
   getSettings,
   setSettings,
+  saveFile,
+  getFile,
 } from "./store.js";
 import { issueToken, requireAuth } from "./auth.js";
 import { OAuth2Client } from "google-auth-library";
 import multer from "multer";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
+// Files are kept in memory then written to MongoDB, so uploads work the same
+// locally and on serverless (Vercel), where the filesystem is read-only.
+// Note: Vercel caps request bodies at ~4.5 MB, so large videos should be
+// pasted as URLs rather than uploaded.
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: UPLOAD_DIR,
-    filename: (req, file, cb) =>
-      cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`),
-  }),
-  limits: { fileSize: 60 * 1024 * 1024 }, // 60 MB
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB (fits MongoDB's document limit)
 });
 
 const app = express();
@@ -41,15 +36,36 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(UPLOAD_DIR));
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
-// ---- Admin: file upload (video / image) ----
-app.post("/api/admin/upload", requireAuth, upload.single("file"), (req, res) => {
+// ---- Admin: file upload (pdf / image / small video) ----
+app.post("/api/admin/upload", requireAuth, upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file" });
-  const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-  res.json({ url });
+  try {
+    const id = await saveFile({
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+      data: req.file.buffer,
+    });
+    res.json({ url: `/api/file/${id}` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ---- Public: serve an uploaded file ----
+app.get("/api/file/:id", async (req, res) => {
+  try {
+    const f = await getFile(req.params.id);
+    if (!f) return res.status(404).end();
+    const buf = f.data?.buffer ? Buffer.from(f.data.buffer) : f.data;
+    res.set("Content-Type", f.contentType || "application/octet-stream");
+    res.set("Cache-Control", "public, max-age=31536000, immutable");
+    res.send(buf);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ---- Public: content for the site ----
@@ -165,6 +181,12 @@ app.put("/api/admin/:type", requireAuth, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Only start a listener for local development. On Vercel the app is imported
+// as a serverless handler (see /api/[...path].js), so we must not call listen.
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
