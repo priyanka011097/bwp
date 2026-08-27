@@ -163,19 +163,30 @@ export async function getContent() {
   return out;
 }
 
-// Site settings (single document). Holds the resume PDF URL and the chatbot
-// knowledge ("about Priyanka") text.
+// Site settings (single document). Holds the resume PDF URL, the chatbot
+// knowledge ("about Priyanka") text, and the chatbot provider/model chosen in
+// the admin panel. Provider and model are stored here rather than in env vars
+// so they can be changed from the admin UI without a redeploy — which is what
+// lets the bot survive a provider retiring a model.
 export async function getSettings() {
   const database = await db();
   const doc = await database.collection("content").findOne({ _id: "settings" });
-  return { resume: doc?.resume || "", knowledge: doc?.knowledge || "" };
+  return {
+    resume: doc?.resume || "",
+    knowledge: doc?.knowledge || "",
+    chatProvider: doc?.chatProvider || "",
+    chatModel: doc?.chatModel || "",
+  };
 }
+
+const SETTING_STRINGS = ["resume", "knowledge", "chatProvider", "chatModel"];
 
 export async function setSettings(patch) {
   const database = await db();
   const allowed = {};
-  if (typeof patch.resume === "string") allowed.resume = patch.resume;
-  if (typeof patch.knowledge === "string") allowed.knowledge = patch.knowledge;
+  for (const key of SETTING_STRINGS) {
+    if (typeof patch[key] === "string") allowed[key] = patch[key];
+  }
   await database
     .collection("content")
     .updateOne({ _id: "settings" }, { $set: allowed }, { upsert: true });

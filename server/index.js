@@ -104,13 +104,44 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // ---- Public: AI chat bot ----
-// Provider is chosen with CHAT_PROVIDER ("nvidia" default, or "anthropic").
-const CHAT_PROVIDER = (process.env.CHAT_PROVIDER || "nvidia").toLowerCase();
-const CHAT_MODEL =
-  process.env.CHAT_MODEL ||
-  (CHAT_PROVIDER === "anthropic"
-    ? "claude-haiku-4-5-20251001"
-    : "meta/llama-3.1-8b-instruct");
+// Provider and model are configured in the admin panel (stored in the settings
+// doc). Env vars CHAT_PROVIDER / CHAT_MODEL are only the fallback default for a
+// fresh install; the admin value always wins, so switching models never needs a
+// redeploy. API keys stay in env vars — secrets are not editable from the web.
+const ENV_PROVIDER = (process.env.CHAT_PROVIDER || "nvidia").toLowerCase();
+const ENV_MODEL = process.env.CHAT_MODEL || "";
+
+// Vetted chat models per provider, best first. If the active model disappears
+// (providers retire models — NVIDIA returns 410 Gone at end-of-life), the bot
+// walks down this list, keeps answering, and saves the one that worked so the
+// recovery is permanent. Keep the newest model at the top.
+const FALLBACK_MODELS = {
+  // Each of these was verified working on this account — a fallback that 404s
+  // is dead weight. Re-check with the admin panel's "Test" button before adding.
+  nvidia: [
+    "nvidia/nemotron-3-nano-30b-a3b",
+    "nvidia/nemotron-3-super-120b-a12b",
+    "nvidia/nemotron-3-ultra-550b-a55b",
+  ],
+  anthropic: ["claude-haiku-4-5-20251001"],
+};
+
+function defaultModel(provider) {
+  return FALLBACK_MODELS[provider]?.[0] || FALLBACK_MODELS.nvidia[0];
+}
+
+// Resolves the provider/model to use: admin setting → env var → built-in default.
+async function resolveChatConfig() {
+  let s = {};
+  try {
+    s = await getSettings();
+  } catch {
+    /* DB unavailable — fall back to env + defaults */
+  }
+  const provider = (s.chatProvider || ENV_PROVIDER).toLowerCase();
+  const model = s.chatModel || ENV_MODEL || defaultModel(provider);
+  return { provider, model, knowledge: s.knowledge || "" };
+}
 
 const CONTACT_WHATSAPP = "https://wa.me/918983569162";
 
@@ -155,32 +186,38 @@ function rateOk(req, max = 15, windowMs = 60000) {
   return recent.length <= max;
 }
 
-// Returns the reply text, or null if no API key is configured.
-async function callAI({ system, messages }) {
-  if (CHAT_PROVIDER === "anthropic") {
-    const key = process.env.ANTHROPIC_API_KEY;
-    if (!key) return null;
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      // Anthropic: system is a separate field, messages are user/assistant only
-      body: JSON.stringify({ model: CHAT_MODEL, max_tokens: 500, system, messages }),
-    });
-    if (!r.ok)
-      throw new Error(`Anthropic ${r.status}: ${(await r.text()).slice(0, 200)}`);
-    const data = await r.json();
-    return (data.content || [])
-      .map((c) => c.text)
-      .filter(Boolean)
-      .join("\n")
-      .trim();
-  }
+// A model that the provider has retired or never hosted. Recoverable: try the
+// next model in the fallback list rather than failing the conversation.
+function modelGoneError(status, body) {
+  const e = new Error(`${status}: ${body.slice(0, 200)}`);
+  e.modelGone = status === 404 || status === 410;
+  return e;
+}
 
-  // NVIDIA (OpenAI-compatible) — default
+async function callAnthropic({ model, system, messages }) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) return null;
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    // Anthropic: system is a separate field, messages are user/assistant only
+    body: JSON.stringify({ model, max_tokens: 1000, system, messages }),
+  });
+  if (!r.ok) throw modelGoneError(r.status, `Anthropic ${await r.text()}`);
+  const data = await r.json();
+  return (data.content || [])
+    .map((c) => c.text)
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+// NVIDIA (OpenAI-compatible) — default
+async function callNvidia({ model, system, messages }) {
   const key = process.env.NVIDIA_API_KEY;
   if (!key) return null;
   const r = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
@@ -191,16 +228,78 @@ async function callAI({ system, messages }) {
     },
     // OpenAI/NVIDIA: system prompt is the first message in the list
     body: JSON.stringify({
-      model: CHAT_MODEL,
+      model,
       messages: [{ role: "system", content: system }, ...messages],
-      max_tokens: 500,
+      // Nemotron models are reasoning models: thinking tokens count towards
+      // max_tokens, so leave enough headroom for the visible reply.
+      max_tokens: 1200,
       temperature: 0.6,
     }),
   });
-  if (!r.ok)
-    throw new Error(`NVIDIA ${r.status}: ${(await r.text()).slice(0, 200)}`);
+  if (!r.ok) throw modelGoneError(r.status, `NVIDIA ${await r.text()}`);
   const data = await r.json();
-  return data.choices?.[0]?.message?.content?.trim();
+  // Some models leak their chain-of-thought into content as a <think> block.
+  return data.choices?.[0]?.message?.content
+    ?.replace(/<think>[\s\S]*?<\/think>/gi, "")
+    .trim();
+}
+
+function callProvider({ provider, model, system, messages }) {
+  return provider === "anthropic"
+    ? callAnthropic({ model, system, messages })
+    : callNvidia({ model, system, messages });
+}
+
+// Lists the chat models the provider currently hosts, so the admin panel can
+// offer a dropdown of models that actually exist right now.
+async function listProviderModels(provider) {
+  if (provider === "anthropic") {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) return [];
+    const r = await fetch("https://api.anthropic.com/v1/models?limit=100", {
+      headers: { "x-api-key": key, "anthropic-version": "2023-06-01" },
+    });
+    if (!r.ok) throw new Error(`Anthropic ${r.status}`);
+    return ((await r.json()).data || []).map((m) => m.id);
+  }
+  const key = process.env.NVIDIA_API_KEY;
+  if (!key) return [];
+  const r = await fetch("https://integrate.api.nvidia.com/v1/models", {
+    headers: { Authorization: `Bearer ${key}` },
+  });
+  if (!r.ok) throw new Error(`NVIDIA ${r.status}`);
+  return ((await r.json()).data || [])
+    .map((m) => m.id)
+    // Embedding / reranking / safety models can't hold a conversation.
+    .filter((id) => !/embed|rerank|guard|safety|reward|topic-control|parse/i.test(id))
+    .sort();
+}
+
+// Calls the model, and if that model has been retired, transparently falls back
+// to the next vetted one and remembers the switch. Returns the reply text, or
+// null if no API key is configured for the provider.
+async function callAI({ provider, model, system, messages }) {
+  const candidates = [
+    model,
+    ...(FALLBACK_MODELS[provider] || []).filter((m) => m !== model),
+  ];
+
+  let lastError;
+  for (const candidate of candidates) {
+    try {
+      const reply = await callProvider({ provider, model: candidate, system, messages });
+      if (candidate !== model && reply) {
+        // Persist the recovery so later requests skip straight to this model.
+        console.warn(`[chat] model "${model}" unavailable — switched to "${candidate}"`);
+        setSettings({ chatModel: candidate }).catch(() => {});
+      }
+      return reply;
+    } catch (e) {
+      lastError = e;
+      if (!e.modelGone) throw e; // a real outage / bad key — don't burn the list
+    }
+  }
+  throw lastError;
 }
 
 app.post("/api/chat", async (req, res) => {
@@ -220,15 +319,12 @@ app.post("/api/chat", async (req, res) => {
       ? req.body.sessionId.slice(0, 100)
       : "";
 
-  let knowledge = "";
-  try {
-    ({ knowledge } = await getSettings());
-  } catch {
-    /* DB unavailable — fall back to default knowledge */
-  }
+  const { provider, model, knowledge } = await resolveChatConfig();
 
   try {
     const reply = await callAI({
+      provider,
+      model,
       system: buildSystemPrompt(knowledge),
       messages: history.slice(-20), // only recent turns go to the model
     });
@@ -249,9 +345,13 @@ app.post("/api/chat", async (req, res) => {
 
     res.json({ reply });
   } catch (e) {
-    res
-      .status(502)
-      .json({ error: "AI unavailable", detail: e.message.slice(0, 200) });
+    // Never show the visitor a broken bot: log for the admin, and still capture
+    // the lead with a warm reply that points at the contact form / WhatsApp.
+    console.error("[chat] provider failed:", e.message.slice(0, 300));
+    res.json({
+      reply: `I'm having a brief technical hiccup, sorry about that! Please send your idea straight to Priyanka — use the contact form on this page, or WhatsApp her at ${CONTACT_WHATSAPP} and she'll reply personally.`,
+      degraded: true,
+    });
   }
 });
 
@@ -326,6 +426,59 @@ app.put("/api/admin/settings", requireAuth, async (req, res) => {
     res.json(await setSettings(req.body || {}));
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ---- Admin: chatbot engine (provider + model, live from the provider) ----
+// Lets Priyanka see which models actually exist right now and switch to one
+// without touching env vars or redeploying.
+app.get("/api/admin/chat/engine", requireAuth, async (req, res) => {
+  const provider = (req.query.provider || "").toString().toLowerCase();
+  const active = await resolveChatConfig();
+  const target = provider || active.provider;
+  let models = [];
+  let error = "";
+  try {
+    models = await listProviderModels(target);
+  } catch (e) {
+    error = e.message.slice(0, 200);
+  }
+  res.json({
+    provider: active.provider,
+    model: active.model,
+    hasKey: Boolean(
+      target === "anthropic"
+        ? process.env.ANTHROPIC_API_KEY
+        : process.env.NVIDIA_API_KEY
+    ),
+    recommended: FALLBACK_MODELS[target] || [],
+    models,
+    error,
+  });
+});
+
+// Sends one throwaway message so the admin can confirm a model works before
+// relying on it. Bypasses the fallback list — we want this model's real verdict.
+app.post("/api/admin/chat/test", requireAuth, async (req, res) => {
+  const active = await resolveChatConfig();
+  const provider = (req.body?.provider || active.provider).toLowerCase();
+  const model = req.body?.model || active.model;
+  const started = Date.now();
+  try {
+    const reply = await callProvider({
+      provider,
+      model,
+      system: "Reply with a single short friendly sentence.",
+      messages: [{ role: "user", content: "Hi, are you working?" }],
+    });
+    if (!reply)
+      return res.json({
+        ok: false,
+        error: `No API key configured for ${provider}.`,
+      });
+    res.json({ ok: true, model, reply, ms: Date.now() - started });
+  } catch (e) {
+    res.json({ ok: false, model, error: e.message.slice(0, 200) });
   }
 });
 

@@ -34,6 +34,7 @@
 
 .adm-login__box input,
 .adm-field input,
+.adm-field select,
 .adm-field textarea {
   font: inherit;
   padding: 0.7rem 0.9rem;
@@ -242,6 +243,36 @@
 
 .adm-status {
   color: #3c554a;
+  font-size: 0.9rem;
+}
+
+/* Secondary action (e.g. "Test" next to a save button) */
+.adm-btn {
+  font: inherit;
+  border: 1.5px solid #17392a;
+  background: transparent;
+  color: #17392a;
+  border-radius: 999px;
+  padding: 0.7rem 1.4rem;
+  cursor: pointer;
+}
+
+/* AI engine status lines */
+.adm-warn {
+  background: #fdf3e7;
+  border-left: 3px solid #d98324;
+  color: #8a5a1a;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.adm-ok {
+  background: #eaf5ee;
+  border-left: 3px solid #2e8b57;
+  color: #1f5c3a;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
   font-size: 0.9rem;
 }
 

@@ -318,6 +318,145 @@ function Conversations({ token }) {
   );
 }
 
+/* ---------------- Chatbot engine (provider + model) ---------------- */
+// Providers retire models (NVIDIA returns "410 Gone" at a model's end of life),
+// which used to take the bot down until someone changed an env var and
+// redeployed. The model list here is fetched live from the provider, so it only
+// ever offers models that exist right now, and the picker saves to the database
+// — no redeploy needed.
+function ChatEngine({ token }) {
+  const [engine, setEngine] = useState(null);
+  const [provider, setProvider] = useState("");
+  const [model, setModel] = useState("");
+  const [status, setStatus] = useState("");
+  const [test, setTest] = useState(null);
+
+  const auth = { Authorization: `Bearer ${token}` };
+
+  const load = (p) => {
+    const qs = p ? `?provider=${encodeURIComponent(p)}` : "";
+    fetch(`${API}/admin/chat/engine${qs}`, { headers: auth })
+      .then((r) => r.json())
+      .then((d) => {
+        setEngine(d);
+        setProvider((cur) => cur || d.provider);
+        setModel((cur) => cur || d.model);
+      })
+      .catch(() => setStatus("Couldn't load model list"));
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const changeProvider = (p) => {
+    setProvider(p);
+    setModel("");
+    setTest(null);
+    load(p);
+  };
+
+  const save = async () => {
+    setStatus("Saving…");
+    const r = await fetch(`${API}/admin/settings`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...auth },
+      body: JSON.stringify({ chatProvider: provider, chatModel: model }),
+    });
+    setStatus(r.ok ? "Saved ✓ — live immediately" : "Error saving");
+    setTimeout(() => setStatus(""), 3000);
+  };
+
+  const runTest = async () => {
+    setTest({ pending: true });
+    const r = await fetch(`${API}/admin/chat/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...auth },
+      body: JSON.stringify({ provider, model }),
+    });
+    setTest(await r.json());
+  };
+
+  // Show every live model, with the recommended ones surfaced at the top.
+  const recommended = (engine?.recommended || []).filter((m) =>
+    engine?.models?.length ? engine.models.includes(m) : true
+  );
+  const others = (engine?.models || []).filter((m) => !recommended.includes(m));
+
+  return (
+    <div className="adm-item">
+      <h3>AI engine</h3>
+      <p>
+        Which AI model powers the bot. If the model you pick is ever retired by
+        the provider, the bot automatically moves to the next working model and
+        keeps answering — you'll just see the model below change.
+      </p>
+
+      {engine && !engine.hasKey && (
+        <p className="adm-warn">
+          No API key is set for <strong>{provider}</strong>. Add the key in
+          Vercel (NVIDIA_API_KEY or ANTHROPIC_API_KEY) — for security, keys
+          can't be set from this panel.
+        </p>
+      )}
+      {engine?.error && (
+        <p className="adm-warn">Couldn't reach {provider}: {engine.error}</p>
+      )}
+
+      <label className="adm-field">
+        <span>Provider</span>
+        <select value={provider} onChange={(e) => changeProvider(e.target.value)}>
+          <option value="nvidia">NVIDIA</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+        </select>
+      </label>
+
+      <label className="adm-field">
+        <span>Model {engine?.models?.length ? `(${engine.models.length} available now)` : ""}</span>
+        <select value={model} onChange={(e) => { setModel(e.target.value); setTest(null); }}>
+          {model && !engine?.models?.includes(model) && (
+            <option value={model}>{model} (currently set)</option>
+          )}
+          {recommended.length > 0 && (
+            <optgroup label="Recommended">
+              {recommended.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </optgroup>
+          )}
+          {others.length > 0 && (
+            <optgroup label="All available">
+              {others.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </label>
+
+      <div className="adm-coll__actions">
+        <button className="adm-save" onClick={save}>
+          Use this model
+        </button>
+        <button className="adm-btn" onClick={runTest}>
+          Test
+        </button>
+        <span className="adm-status">{status}</span>
+      </div>
+
+      {test && (
+        <p className={test.ok ? "adm-ok" : test.pending ? "adm-status" : "adm-warn"}>
+          {test.pending
+            ? "Testing…"
+            : test.ok
+            ? `✓ Working (${test.ms}ms) — "${test.reply}"`
+            : `✗ Not working: ${test.error}`}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- Chatbot knowledge ---------------- */
 function Chatbot({ token }) {
   const [text, setText] = useState("");
@@ -348,6 +487,7 @@ function Chatbot({ token }) {
 
   return (
     <div className="adm-coll">
+      <ChatEngine token={token} />
       <div className="adm-item">
         <p>
           Write everything the AI bot should know about you — your bio, services,
