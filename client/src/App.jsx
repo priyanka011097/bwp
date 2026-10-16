@@ -4,6 +4,7 @@ import Statement from "./components/Statement.jsx";
 import Cases from "./components/Cases.jsx";
 import Process from "./components/Process.jsx";
 import Services from "./components/Services.jsx";
+import Dominate360 from "./components/Dominate360.jsx";
 import About from "./components/About.jsx";
 import Approach from "./components/Approach.jsx";
 import Testimonials from "./components/Testimonials.jsx";
@@ -35,8 +36,9 @@ export default function App() {
     <div className="page">
       <Header />
       <Hero />
-      <Statement />
+      <Dominate360 />
       <Cases />
+      <Statement />
       <Contact />
       <Process />
       <Services />

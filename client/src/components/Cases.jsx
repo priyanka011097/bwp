@@ -111,7 +111,7 @@ export default function Cases() {
     <section className="cases" id="work">
       <div className="cases__head">
         <p className="cases__label">RECENT</p>
-        <h2 className="cases__heading">eCommerce Websites I Build</h2>
+        <h2 className="cases__heading">Websites I Build</h2>
       </div>
 
       <div className="cases__grid">

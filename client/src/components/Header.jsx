@@ -3,6 +3,7 @@ import Logo from "./Logo.jsx";
 
 const NAV_ITEMS = [
   { label: "Home", href: "#" },
+  { label: "Dominate 360", href: "#dominate360" },
   { label: "My work", href: "#work" },
   { label: "Contact", href: "#contact" },
   { label: "Services", href: "#services" },

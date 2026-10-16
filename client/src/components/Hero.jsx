@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import heroImg1 from "../assets/heroimg1.jpg";
 import heroImg2 from "../assets/heroimg2.jpg";
 
@@ -7,15 +7,6 @@ export default function Hero() {
   const line2Ref = useRef(null);
   const personRef = useRef(null);
   const shelfRef = useRef(null);
-  const [resume, setResume] = useState("");
-
-  useEffect(() => {
-    fetch("/api/content")
-      .then((r) => r.json())
-      .then((c) => setResume(c?.settings?.resume || ""))
-      .catch(() => {});
-  }, []);
-
   useEffect(() => {
     const SPEED = 0.6; // px moved per px scrolled
     let raf = 0;
@@ -60,40 +51,6 @@ export default function Hero() {
       <figure className="hero__photo hero__photo--shelf" ref={shelfRef}>
         <img src={heroImg1} alt="" />
       </figure>
-
-      {/* Rotating resume-download badge */}
-      <a
-        className="hero__badge"
-        href={resume || "#contact"}
-        {...(resume ? { download: "", target: "_blank", rel: "noreferrer" } : {})}
-        aria-label="Download my resume"
-      >
-        <svg className="hero__badge-ring" viewBox="0 0 140 140" aria-hidden="true">
-          <defs>
-            <path
-              id="badge-circle"
-              d="M70,70 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0"
-            />
-          </defs>
-          <text>
-            <textPath href="#badge-circle" startOffset="0">
-              DOWNLOAD MY RESUME •&nbsp;
-            </textPath>
-          </text>
-        </svg>
-        <span className="hero__badge-dot" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path
-              d="M12 4v14m0 0l-6-6m6 6l6-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-      </a>
 
       {/* Tagline */}
       <p className="hero__tagline">

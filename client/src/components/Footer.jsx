@@ -2,6 +2,7 @@ import logo from "../assets/logodark.png";
 
 const NAV = [
   ["Home", "#"],
+  ["Dominate 360", "#dominate360"],
   ["My work", "#work"],
   ["Contact", "#contact"],
   ["Services", "#services"],
