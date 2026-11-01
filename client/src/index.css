@@ -813,10 +813,17 @@ body::-webkit-scrollbar {
   gap: 3rem 5rem;
   max-width: 1400px;
   margin: 0 auto;
+  align-items: start;
+}
+
+.cases__col {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
 }
 
 /* Stagger the right column downwards */
-.case-card:nth-child(even) {
+.cases__col:nth-child(2) {
   margin-top: 9rem;
 }
 
@@ -1023,8 +1030,8 @@ body::-webkit-scrollbar {
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
-  .case-card:nth-child(even) {
-    margin-top: 0;
+  .cases__col {
+    display: contents;
   }
   /* Touch devices: no custom cursor, keep normal tap */
   .case-cursor {

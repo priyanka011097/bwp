@@ -197,32 +197,41 @@ export default function Cases() {
         <h2 className="cases__heading">Product I Build</h2>
       </div>
 
+      {/* Two independent columns so a short card never leaves a gap under it.
+          On mobile the columns collapse and `order` restores the list order. */}
       <div className="cases__grid">
-        {CASES.map((c, i) => (
-          <a
-            className="case-card"
-            href={c.href}
-            key={`${i}-${c.title}`}
-            {...(c.href?.startsWith("http")
-              ? { target: "_blank", rel: "noopener noreferrer" }
-              : {})}
-          >
-            <CaseMedia
-              src={c.src}
-              onEnter={() => setActive(true)}
-              onLeave={() => setActive(false)}
-            />
+        {[0, 1].map((col) => (
+          <div className="cases__col" key={col}>
+            {CASES.map((c, i) =>
+              i % 2 !== col ? null : (
+                <a
+                  className="case-card"
+                  href={c.href}
+                  key={`${i}-${c.title}`}
+                  style={{ order: i }}
+                  {...(c.href?.startsWith("http")
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                >
+                  <CaseMedia
+                    src={c.src}
+                    onEnter={() => setActive(true)}
+                    onLeave={() => setActive(false)}
+                  />
 
-            <h3 className="case-card__title">{c.title}</h3>
-            <ul className="case-card__tags">
-              {c.tags.map((t) => (
-                <li className="case-tag" key={t.label}>
-                  <TagIcon name={t.icon} />
-                  <span>{t.label}</span>
-                </li>
-              ))}
-            </ul>
-          </a>
+                  <h3 className="case-card__title">{c.title}</h3>
+                  <ul className="case-card__tags">
+                    {c.tags.map((t) => (
+                      <li className="case-tag" key={t.label}>
+                        <TagIcon name={t.icon} />
+                        <span>{t.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </a>
+              )
+            )}
+          </div>
         ))}
       </div>
 
