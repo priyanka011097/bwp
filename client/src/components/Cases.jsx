@@ -4,6 +4,7 @@ import { driveEmbedUrl } from "../media.js";
 import pintaboo from "../assets/pintaboo.mp4";
 import proeaseglobal from "../assets/proeaseglobal.mp4";
 import hypertransformerai from "../assets/hypertransformerai.mp4";
+import deskcommander from "../assets/deskcommander.mp4";
 
 // Videos shipped with the site. An admin case can use one by putting its
 // file name (e.g. "hypertransformerai.mp4") in the video field.
@@ -11,6 +12,7 @@ const BUNDLED_VIDEOS = {
   "pintaboo.mp4": pintaboo,
   "proeaseglobal.mp4": proeaseglobal,
   "hypertransformerai.mp4": hypertransformerai,
+  "deskcommander.mp4": deskcommander,
 };
 
 function TagIcon({ name }) {
@@ -83,6 +85,16 @@ const DEFAULT_CASES = [
       { icon: "science", label: "Product" },
       { icon: "identity", label: "Strategy" },
       { icon: "print", label: "Design" },
+    ],
+  },
+  {
+    title: "Deskcommander",
+    src: deskcommander,
+    href: "https://deskcommander.iamfuckingawsome.com/",
+    tags: [
+      { icon: "science", label: "SaaS" },
+      { icon: "identity", label: "Product" },
+      { icon: "print", label: "AI" },
     ],
   },
 ];

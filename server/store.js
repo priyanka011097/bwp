@@ -46,6 +46,13 @@ export const DEFAULTS = {
       video: "hypertransformerai.mp4",
       tags: ["Product", "Strategy", "Design"],
     },
+    {
+      id: "c4",
+      title: "Deskcommander",
+      href: "https://deskcommander.iamfuckingawsome.com/",
+      video: "deskcommander.mp4",
+      tags: ["SaaS", "Product", "AI"],
+    },
   ],
   testimonials: [
     {
