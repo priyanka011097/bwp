@@ -10,6 +10,10 @@ import {
   setSettings,
   saveFile,
   getFile,
+  startChunkedFile,
+  saveChunk,
+  finishChunkedFile,
+  readChunkedRange,
   saveConversation,
   getConversations,
   deleteConversation,
@@ -57,34 +61,103 @@ app.post("/api/admin/upload", requireAuth, upload.single("file"), async (req, re
   }
 });
 
+// ---- Admin: chunked upload for large files (videos) ----
+// Vercel rejects request bodies over ~4.5 MB, so the admin panel slices big
+// files into UPLOAD_CHUNK pieces: init -> one POST per chunk -> complete.
+const UPLOAD_CHUNK = 3 * 1024 * 1024;
+const MAX_UPLOAD = 200 * 1024 * 1024;
+
+app.post("/api/admin/upload/init", requireAuth, async (req, res) => {
+  const { filename, contentType, size } = req.body || {};
+  if (!size || size > MAX_UPLOAD) {
+    return res.status(400).json({ error: "File missing or larger than 200 MB" });
+  }
+  try {
+    const id = await startChunkedFile({
+      filename: filename || "file",
+      contentType: contentType || "application/octet-stream",
+      size,
+      chunkSize: UPLOAD_CHUNK,
+    });
+    res.json({ id, chunkSize: UPLOAD_CHUNK });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post(
+  "/api/admin/upload/:id/chunk/:n",
+  requireAuth,
+  express.raw({ type: "*/*", limit: UPLOAD_CHUNK + 1024 }),
+  async (req, res) => {
+    const n = parseInt(req.params.n, 10);
+    if (!Number.isInteger(n) || n < 0 || !req.body?.length) {
+      return res.status(400).json({ error: "Bad chunk" });
+    }
+    try {
+      await saveChunk(req.params.id, n, req.body);
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  }
+);
+
+app.post("/api/admin/upload/:id/complete", requireAuth, async (req, res) => {
+  try {
+    if (!(await finishChunkedFile(req.params.id))) {
+      return res.status(400).json({ error: "Upload incomplete" });
+    }
+    res.json({ url: `/api/file/${req.params.id}` });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ---- Public: serve an uploaded file ----
+// Vercel also caps response bodies at ~4.5 MB, so large files are only ever
+// sent in byte ranges of at most MAX_SLICE. Browsers' video players request
+// ranges and keep asking until they have what they need.
+const MAX_SLICE = 3 * 1024 * 1024;
+
 app.get("/api/file/:id", async (req, res) => {
   try {
     const f = await getFile(req.params.id);
-    if (!f) return res.status(404).end();
-    const buf = f.data?.buffer ? Buffer.from(f.data.buffer) : f.data;
+    if (!f || (f.chunked && !f.complete)) return res.status(404).end();
+    const buf = f.chunked
+      ? null
+      : f.data?.buffer
+        ? Buffer.from(f.data.buffer)
+        : f.data;
+    const size = f.chunked ? f.size : buf.length;
     res.set("Content-Type", f.contentType || "application/octet-stream");
     res.set("Cache-Control", "public, max-age=31536000, immutable");
     res.set("Accept-Ranges", "bytes");
 
-    // Browsers (Safari/iOS always) fetch video in byte ranges and refuse to
-    // play it if the server can't answer with 206 Partial Content.
+    // Safari/iOS refuse to play video unless the server answers ranges with 206.
     const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
-    if (m && (m[1] || m[2])) {
-      const size = buf.length;
-      let start = m[1] ? parseInt(m[1], 10) : size - parseInt(m[2], 10);
-      let end = m[1] && m[2] ? parseInt(m[2], 10) : size - 1;
+    const ranged = m && (m[1] || m[2]);
+    if (!ranged && size <= MAX_SLICE) return res.send(buf);
+
+    let start = 0;
+    let end = size - 1;
+    if (ranged) {
+      start = m[1] ? parseInt(m[1], 10) : size - parseInt(m[2], 10);
+      end = m[1] && m[2] ? parseInt(m[2], 10) : size - 1;
       start = Math.max(0, start);
       end = Math.min(end, size - 1);
       if (start > end) {
         res.set("Content-Range", `bytes */${size}`);
         return res.status(416).end();
       }
-      res.status(206);
-      res.set("Content-Range", `bytes ${start}-${end}/${size}`);
-      return res.send(buf.subarray(start, end + 1));
     }
-    res.send(buf);
+    end = Math.min(end, start + MAX_SLICE - 1);
+    const body = f.chunked
+      ? await readChunkedRange(f, start, end)
+      : buf.subarray(start, end + 1);
+    res.status(206);
+    res.set("Content-Range", `bytes ${start}-${end}/${size}`);
+    res.send(body);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

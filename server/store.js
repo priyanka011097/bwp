@@ -266,6 +266,62 @@ export async function getFile(id) {
   return database.collection("uploads").findOne({ _id: new ObjectId(id) });
 }
 
+// Large files (videos) arrive in pieces because Vercel caps every request and
+// response at ~4.5 MB. The "uploads" doc holds the metadata; the bytes live in
+// "upload_chunks" as { fileId, n, data }, all chunks chunkSize bytes but the last.
+export async function startChunkedFile({ filename, contentType, size, chunkSize }) {
+  const database = await db();
+  const result = await database.collection("uploads").insertOne({
+    filename,
+    contentType,
+    size,
+    chunkSize,
+    chunked: true,
+    complete: false,
+    createdAt: new Date().toISOString(),
+  });
+  return result.insertedId.toString();
+}
+
+export async function saveChunk(id, n, data) {
+  const database = await db();
+  await database
+    .collection("upload_chunks")
+    .updateOne({ fileId: id, n }, { $set: { data } }, { upsert: true });
+}
+
+export async function finishChunkedFile(id) {
+  const database = await db();
+  const file = await getFile(id);
+  if (!file?.chunked) return false;
+  const expected = Math.ceil(file.size / file.chunkSize);
+  const have = await database
+    .collection("upload_chunks")
+    .countDocuments({ fileId: id });
+  if (have !== expected) return false;
+  await database
+    .collection("uploads")
+    .updateOne({ _id: file._id }, { $set: { complete: true } });
+  return true;
+}
+
+// Returns bytes [start, end] (inclusive) of a chunked file.
+export async function readChunkedRange(file, start, end) {
+  const database = await db();
+  const first = Math.floor(start / file.chunkSize);
+  const last = Math.floor(end / file.chunkSize);
+  const chunks = await database
+    .collection("upload_chunks")
+    .find({ fileId: file._id.toString(), n: { $gte: first, $lte: last } })
+    .sort({ n: 1 })
+    .toArray();
+  const buf = Buffer.concat(
+    chunks.map((c) => (c.data?.buffer ? Buffer.from(c.data.buffer) : c.data))
+  );
+  const offset = start - first * file.chunkSize;
+  return buf.subarray(offset, offset + (end - start + 1));
+}
+
 export async function deleteFrom(name, id) {
   const database = await db();
   if (name === "enquiries") {

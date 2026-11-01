@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./admin.css";
+import { driveEmbedUrl } from "../media.js";
 
 const API = "/api";
 
@@ -577,24 +578,47 @@ function Collection({ token, type }) {
 
   const removeItem = (i) => setItems(items.filter((_, idx) => idx !== i));
 
+  // Sent in chunks: Vercel rejects any single request over ~4.5 MB.
   const uploadFile = async (i, key, file) => {
-    const fd = new FormData();
-    fd.append("file", file);
+    const auth = { Authorization: `Bearer ${token}` };
+    const fail = async (res) => {
+      const msg = (await res.json().catch(() => null))?.error;
+      setStatus(`Upload failed: ${msg || res.status}`);
+      setTimeout(() => setStatus(""), 8000);
+    };
+
     setStatus("Uploading…");
-    const res = await fetch(`${API}/admin/upload`, {
+    const init = await fetch(`${API}/admin/upload/init`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: fd,
+      headers: { ...auth, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type,
+        size: file.size,
+      }),
     });
-    if (res.ok) {
-      const { url } = await res.json();
-      update(i, key, url);
-      setStatus("Uploaded ✓ — click Save changes");
-    } else if (res.status === 413) {
-      setStatus("Upload failed: file too large — paste a video URL instead");
-    } else {
-      setStatus(`Upload failed (${res.status})`);
+    if (!init.ok) return fail(init);
+    const { id, chunkSize } = await init.json();
+
+    const total = Math.ceil(file.size / chunkSize);
+    for (let n = 0; n < total; n++) {
+      setStatus(`Uploading… ${Math.round((n / total) * 100)}%`);
+      const res = await fetch(`${API}/admin/upload/${id}/chunk/${n}`, {
+        method: "POST",
+        headers: { ...auth, "Content-Type": "application/octet-stream" },
+        body: file.slice(n * chunkSize, (n + 1) * chunkSize),
+      });
+      if (!res.ok) return fail(res);
     }
+
+    const done = await fetch(`${API}/admin/upload/${id}/complete`, {
+      method: "POST",
+      headers: auth,
+    });
+    if (!done.ok) return fail(done);
+    const { url } = await done.json();
+    update(i, key, url);
+    setStatus("Uploaded ✓ — click Save changes");
     setTimeout(() => setStatus(""), 6000);
   };
 
@@ -664,16 +688,26 @@ function Collection({ token, type }) {
                   />
                   {item[key] && (
                     <>
-                      <video
-                        className="adm-media-preview"
-                        src={item[key]}
-                        muted
-                        loop
-                        autoPlay
-                        playsInline
-                        controls
-                        style={{ maxWidth: 320, maxHeight: 240, borderRadius: 8 }}
-                      />
+                      {driveEmbedUrl(item[key]) ? (
+                        <iframe
+                          className="adm-media-preview"
+                          src={driveEmbedUrl(item[key])}
+                          title="Preview"
+                          allow="autoplay"
+                          style={{ width: 320, height: 180, border: 0, borderRadius: 8 }}
+                        />
+                      ) : (
+                        <video
+                          className="adm-media-preview"
+                          src={item[key]}
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                          controls
+                          style={{ maxWidth: 320, maxHeight: 240, borderRadius: 8 }}
+                        />
+                      )}
                       <span className="adm-media-preview">
                         Current: {item[key]}
                       </span>

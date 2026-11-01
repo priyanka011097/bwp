@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useContent } from "../useContent.js";
+import { driveEmbedUrl } from "../media.js";
 import pintaboo from "../assets/pintaboo.mp4";
 import proeaseglobal from "../assets/proeaseglobal.mp4";
 
@@ -88,6 +89,26 @@ function CaseMedia({ src, onEnter, onLeave }) {
   }, [src]);
 
   const fit = (w, h) => setRatio(w && h && w > h ? `${w} / ${h}` : null);
+
+  // Drive's player doesn't expose the video size; assume a landscape clip.
+  const drive = driveEmbedUrl(src);
+  if (drive) {
+    return (
+      <div
+        className="case-card__media case-card__media--landscape"
+        style={{ aspectRatio: "16 / 9" }}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+      >
+        <iframe
+          src={drive}
+          title="Case video"
+          allow="autoplay; fullscreen"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
 
   return (
     <div
