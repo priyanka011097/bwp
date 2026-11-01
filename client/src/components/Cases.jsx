@@ -3,6 +3,15 @@ import { useContent } from "../useContent.js";
 import { driveEmbedUrl } from "../media.js";
 import pintaboo from "../assets/pintaboo.mp4";
 import proeaseglobal from "../assets/proeaseglobal.mp4";
+import hypertransformerai from "../assets/hypertransformerai.mp4";
+
+// Videos shipped with the site. An admin case can use one by putting its
+// file name (e.g. "hypertransformerai.mp4") in the video field.
+const BUNDLED_VIDEOS = {
+  "pintaboo.mp4": pintaboo,
+  "proeaseglobal.mp4": proeaseglobal,
+  "hypertransformerai.mp4": hypertransformerai,
+};
 
 function TagIcon({ name }) {
   switch (name) {
@@ -64,6 +73,16 @@ const DEFAULT_CASES = [
       { icon: "science", label: "Product" },
       { icon: "identity", label: "Design" },
       { icon: "web", label: "Cloud" },
+    ],
+  },
+  {
+    title: "Hypertransformerai.com",
+    src: hypertransformerai,
+    href: "https://hypertransformerai.com/",
+    tags: [
+      { icon: "science", label: "Product" },
+      { icon: "identity", label: "Strategy" },
+      { icon: "print", label: "Design" },
     ],
   },
 ];
@@ -150,7 +169,7 @@ export default function Cases() {
     return {
       title: c.title ?? d.title,
       href: c.href ?? d.href,
-      src: c.video || d.src,
+      src: BUNDLED_VIDEOS[c.video] || c.video || d.src,
       tags: Array.isArray(c.tags)
         ? c.tags.map((t, j) =>
             typeof t === "string"

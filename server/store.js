@@ -39,6 +39,13 @@ export const DEFAULTS = {
       video: "",
       tags: ["Product", "Design", "Cloud"],
     },
+    {
+      id: "c3",
+      title: "Hypertransformerai.com",
+      href: "https://hypertransformerai.com/",
+      video: "hypertransformerai.mp4",
+      tags: ["Product", "Strategy", "Design"],
+    },
   ],
   testimonials: [
     {
