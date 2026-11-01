@@ -589,11 +589,13 @@ function Collection({ token, type }) {
     if (res.ok) {
       const { url } = await res.json();
       update(i, key, url);
-      setStatus("Uploaded ✓");
+      setStatus("Uploaded ✓ — click Save changes");
+    } else if (res.status === 413) {
+      setStatus("Upload failed: file too large — paste a video URL instead");
     } else {
-      setStatus("Upload failed");
+      setStatus(`Upload failed (${res.status})`);
     }
-    setTimeout(() => setStatus(""), 2000);
+    setTimeout(() => setStatus(""), 6000);
   };
 
   const save = async () => {
@@ -661,9 +663,21 @@ function Collection({ token, type }) {
                     }}
                   />
                   {item[key] && (
-                    <span className="adm-media-preview">
-                      Current: {item[key]}
-                    </span>
+                    <>
+                      <video
+                        className="adm-media-preview"
+                        src={item[key]}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        controls
+                        style={{ maxWidth: 320, maxHeight: 240, borderRadius: 8 }}
+                      />
+                      <span className="adm-media-preview">
+                        Current: {item[key]}
+                      </span>
+                    </>
                   )}
                 </>
               ) : (

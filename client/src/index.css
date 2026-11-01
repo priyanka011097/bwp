@@ -834,7 +834,8 @@ body::-webkit-scrollbar {
   aspect-ratio: 4 / 5;
 }
 
-.case-card__media video {
+.case-card__media video,
+.case-card__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;

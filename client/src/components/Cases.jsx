@@ -75,6 +75,49 @@ const PETALS = Array.from({ length: 8 }, (_, i) => {
 
 const TAG_ICONS = ["science", "identity", "print", "web"];
 
+// Plays the case video (or shows an image if an image was uploaded), and
+// switches the card to the media's own shape when it is landscape so
+// horizontal videos aren't cropped into the portrait frame.
+function CaseMedia({ src, onEnter, onLeave }) {
+  const [isImage, setIsImage] = useState(false);
+  const [ratio, setRatio] = useState(null);
+
+  useEffect(() => {
+    setIsImage(false);
+    setRatio(null);
+  }, [src]);
+
+  const fit = (w, h) => setRatio(w && h && w > h ? `${w} / ${h}` : null);
+
+  return (
+    <div
+      className={`case-card__media${ratio ? " case-card__media--landscape" : ""}`}
+      style={ratio ? { aspectRatio: ratio } : undefined}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      {isImage ? (
+        <img
+          src={src}
+          alt=""
+          onLoad={(e) => fit(e.target.naturalWidth, e.target.naturalHeight)}
+        />
+      ) : (
+        <video
+          src={src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          onLoadedMetadata={(e) => fit(e.target.videoWidth, e.target.videoHeight)}
+          onError={() => setIsImage(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function Cases() {
   const cursorRef = useRef(null);
   const [active, setActive] = useState(false);
@@ -111,33 +154,24 @@ export default function Cases() {
     <section className="cases" id="work">
       <div className="cases__head">
         <p className="cases__label">RECENT</p>
-        <h2 className="cases__heading">Websites I Build</h2>
+        <h2 className="cases__heading">Product I Build</h2>
       </div>
 
       <div className="cases__grid">
-        {CASES.map((c) => (
+        {CASES.map((c, i) => (
           <a
             className="case-card"
             href={c.href}
-            key={c.title}
+            key={`${i}-${c.title}`}
             {...(c.href?.startsWith("http")
               ? { target: "_blank", rel: "noopener noreferrer" }
               : {})}
           >
-            <div
-              className="case-card__media"
-              onMouseEnter={() => setActive(true)}
-              onMouseLeave={() => setActive(false)}
-            >
-              <video
-                src={c.src}
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="metadata"
-              />
-            </div>
+            <CaseMedia
+              src={c.src}
+              onEnter={() => setActive(true)}
+              onLeave={() => setActive(false)}
+            />
 
             <h3 className="case-card__title">{c.title}</h3>
             <ul className="case-card__tags">

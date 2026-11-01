@@ -65,6 +65,25 @@ app.get("/api/file/:id", async (req, res) => {
     const buf = f.data?.buffer ? Buffer.from(f.data.buffer) : f.data;
     res.set("Content-Type", f.contentType || "application/octet-stream");
     res.set("Cache-Control", "public, max-age=31536000, immutable");
+    res.set("Accept-Ranges", "bytes");
+
+    // Browsers (Safari/iOS always) fetch video in byte ranges and refuse to
+    // play it if the server can't answer with 206 Partial Content.
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+    if (m && (m[1] || m[2])) {
+      const size = buf.length;
+      let start = m[1] ? parseInt(m[1], 10) : size - parseInt(m[2], 10);
+      let end = m[1] && m[2] ? parseInt(m[2], 10) : size - 1;
+      start = Math.max(0, start);
+      end = Math.min(end, size - 1);
+      if (start > end) {
+        res.set("Content-Range", `bytes */${size}`);
+        return res.status(416).end();
+      }
+      res.status(206);
+      res.set("Content-Range", `bytes ${start}-${end}/${size}`);
+      return res.send(buf.subarray(start, end + 1));
+    }
     res.send(buf);
   } catch (e) {
     res.status(500).json({ error: e.message });
